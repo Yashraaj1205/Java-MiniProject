@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loans - LendFlow</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div th:replace="~{fragments/layout :: sidebar('loans')}"></div>
+    <div class="content">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <h1 class="page-title mb-0">Loans</h1>
+            <button class="btn" style="background:#FFB800; color:#000; font-weight:600;" data-bs-toggle="modal" data-bs-target="#addLoanModal">
+                <i class="fa-solid fa-plus me-1"></i> Add Loan
+            </button>
+        </div>
+        <p class="page-subtitle">Track and manage credit transactions</p>
+
+        <div class="table-card mt-4">
+            <h5 class="fw-bold mb-3">All Credit Entries</h5>
+            
+            <table class="table table-borderless">
+                <thead>
+                    <tr>
+                        <th>Ref</th>
+                        <th>Borrower</th>
+                        <th>Principal</th>
+                        <th>Outstanding</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="loan : ${loans}">
+                        <td th:text="${loan.loanReference}">LN-001</td>
+                        <td th:text="${loan.borrower.name}" class="fw-bold" style="color:#11142D;">Name</td>
+                        <td th:text="${'₹' + #numbers.formatDecimal(loan.principalAmount, 0, 'COMMA', 0, 'POINT')}">₹1000</td>
+                        <td th:text="${'₹' + #numbers.formatDecimal(loan.outstandingBalance, 0, 'COMMA', 0, 'POINT')}" style="color: #C62828; font-weight:600;">₹1000</td>
+                        <td th:text="${#temporals.format(loan.nextDueDate, 'MMM dd, yyyy')}">Date</td>
+                        <td>
+                            <span th:class="${'badge-status badge-' + loan.status.toLowerCase()}" th:text="${loan.status}">Active</span>
+                            <button th:if="${loan.status == 'Active' || loan.status == 'Overdue'}" class="btn btn-sm ms-2" style="background:#E8F5E9; color:#2E7D32; font-weight:600; font-size: 0.75rem;" data-bs-toggle="modal" th:data-bs-target="${'#payModal' + loan.id}">Pay</button>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(loans)}">
+                        <td colspan="6" class="text-center text-muted py-4">No loans active. Add a loan above!</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Payment Modals -->
+    <div th:each="l : ${loans}" th:if="${l.status == 'Active' || l.status == 'Overdue'}" class="modal fade" th:id="${'payModal' + l.id}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-radius: 12px; border: none;">
+                <div class="modal-header" style="border-bottom: 1px solid #f0f0f0;">
+                    <h5 class="modal-title fw-bold" th:text="${'Record Payment - ' + l.loanReference}">Record Payment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form th:action="@{/loans/pay}" method="post">
+                    <input type="hidden" name="loanId" th:value="${l.id}">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label text-muted fw-semibold" style="font-size: 0.85rem;">Amount Received (₹) *</label>
+                            <input type="number" name="amount" class="form-control" min="1" required>
+                            <small class="text-muted" th:text="${'Pending Balance: ₹' + #numbers.formatDecimal(l.outstandingBalance, 0, 'COMMA', 0, 'POINT')}"></small>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top: 1px solid #f0f0f0;">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn" style="background:#27AE60; color:#fff; font-weight:600;">Confirm Payment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Loan Modal -->
+    <div class="modal fade" id="addLoanModal" tabindex="-1" aria-labelledby="addLoanModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-radius: 12px; border: none;">
+                <div class="modal-header" style="border-bottom: 1px solid #f0f0f0;">
+                    <h5 class="modal-title fw-bold" id="addLoanModalLabel">Add New Loan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form th:action="@{/loans/add}" th:object="${newLoan}" method="post">
+                    <div class="modal-body p-4">
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-muted fw-semibold" style="font-size: 0.85rem;">Select Borrower *</label>
+                            <select name="borrowerId" class="form-select" required>
+                                <option value="" disabled selected>Select an existing borrower</option>
+                                <option th:each="b : ${borrowers}" th:value="${b.id}" th:text="${b.name} + ' (' + ${b.phone} + ')'"></option>
+                            </select>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label text-muted fw-semibold" style="font-size: 0.85rem;">Principal Amount (₹) *</label>
+                                <input type="number" th:field="*{principalAmount}" class="form-control" required min="1">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label text-muted fw-semibold" style="font-size: 0.85rem;">Interest Rate (%)</label>
+                                <input type="number" step="0.1" th:field="*{interestRate}" class="form-control" value="0.0">
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label text-muted fw-semibold" style="font-size: 0.85rem;">Next Due Date *</label>
+                                <input type="date" th:field="*{nextDueDate}" class="form-control" required>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div class="modal-footer" style="border-top: 1px solid #f0f0f0;">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn" style="background:#FFB800; color:#000; font-weight:600;">Issue Loan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

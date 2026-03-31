@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - LendFlow</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+    <div th:replace="~{fragments/layout :: sidebar('notifications')}"></div>
+
+    <div class="content">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <h1 class="page-title mb-0">Notifications</h1>
+            <!-- Superficial text as requested in designs -->
+            <a href="#" style="color: #FFB800; font-weight: 600; text-decoration: none;">Mark all as read</a>
+        </div>
+        <p class="page-subtitle">Stay updated on loan activities</p>
+
+        <div style="max-width: 800px;">
+            
+            <!-- Dynamic Overdue Loans -->
+            <div th:each="loan : ${overdue}" class="notification-card">
+                <div class="notification-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="notification-content">
+                    <h5 th:text="${'EMI Overdue - ' + loan.borrower.name}">EMI Overdue</h5>
+                    <p th:text="${'₹' + #numbers.formatDecimal(loan.outstandingBalance, 0, 'COMMA', 0, 'POINT') + ' pending. Was due on ' + #temporals.format(loan.nextDueDate, 'MMM dd, yyyy')}"></p>
+                </div>
+                <div class="notification-time">Action Required</div>
+            </div>
+
+            <!-- Dynamic Approaching Loans -->
+            <div th:each="loan : ${approaching}" class="notification-card">
+                <div class="notification-icon yellow"><i class="fa-regular fa-clock"></i></div>
+                <div class="notification-content">
+                    <h5 th:text="${'Upcoming EMI - ' + loan.borrower.name}">Upcoming EMI</h5>
+                    <p th:text="${'₹' + #numbers.formatDecimal(loan.outstandingBalance, 0, 'COMMA', 0, 'POINT') + ' due on ' + #temporals.format(loan.nextDueDate, 'MMM dd, yyyy') + '. Send reminder?'}"></p>
+                    <div class="mt-2">
+                        <!-- WhatsApp Deep-Link Logic integrating custom message and target phone number native to browser -->
+                        <a th:href="${'https://api.whatsapp.com/send?phone=' + loan.borrower.phone + '&text=Hello ' + loan.borrower.name + ', gentle reminder that your loan EMI of Rs.' + #numbers.formatDecimal(loan.emiAmount, 0, 'COMMA', 0, 'POINT') + ' is approaching its due date.'}" 
+                           target="_blank" class="btn btn-sm" style="background:#E8F5E9; color:#2E7D32; font-weight:600; text-decoration:none;">
+                           Send WhatsApp Reminder
+                        </a>
+                        <button class="btn btn-sm ms-2" style="background:#F3F4F6; color:#6B7280; font-weight:600;">Dismiss</button>
+                    </div>
+                </div>
+                <div class="notification-time">Approaching</div>
+            </div>
+
+            <!-- Empty State Generator -->
+            <div th:if="${#lists.isEmpty(overdue) && #lists.isEmpty(approaching)}" class="text-center text-muted py-5 mt-4" style="background: white; border-radius:12px; border:1px solid #f0f0f0;">
+                <i class="fa-solid fa-bell-slash fs-1 mb-3" style="color:#d1d5db;"></i>
+                <h5 class="fw-bold" style="color:#11142D;">All caught up!</h5>
+                <p>You have no pending or overdue payment notifications generated for today.</p>
+            </div>
+            
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
