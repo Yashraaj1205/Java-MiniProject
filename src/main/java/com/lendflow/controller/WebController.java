@@ -24,11 +24,8 @@ public class WebController {
         return "dashboard";
     }
 
-
-
-
     @GetMapping("/settings")
-    public String settings(Model model) {
-        return "settings"; // To be implemented
+    public String settings() {
+        return "settings";
     }
 }

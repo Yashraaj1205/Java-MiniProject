@@ -20,106 +20,130 @@
         <p class="page-subtitle">Track and manage credit transactions</p>
 
         <div class="table-card mt-4">
-            <h5 class="fw-bold mb-3">All Credit Entries</h5>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold m-0">All Credit Entries</h5>
+                <div class="search-wrapper">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search by borrower or ref...">
+                </div>
+            </div>
             
-            <table class="table table-borderless">
+            <table class="table table-borderless" id="loansTable">
                 <thead>
                     <tr>
                         <th>Ref</th>
                         <th>Borrower</th>
                         <th>Principal</th>
+                        <th>Tenure / Rate</th>
+                        <th>Next Due</th>
                         <th>Outstanding</th>
-                        <th>Due Date</th>
                         <th>Status</th>
+                        <th>Progress</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="loan : ${loans}">
-                        <td th:text="${loan.loanReference}">LN-001</td>
-                        <td th:text="${loan.borrower.name}" class="fw-bold" style="color:#11142D;">Name</td>
+                        <td th:text="${loan.loanReference}" class="searchable">LN-001</td>
+                        <td th:text="${loan.borrower.name}" class="fw-bold searchable" style="color:var(--text-main);">Name</td>
                         <td th:text="${'₹' + #numbers.formatDecimal(loan.principalAmount, 0, 'COMMA', 0, 'POINT')}">₹1000</td>
-                        <td th:text="${'₹' + #numbers.formatDecimal(loan.outstandingBalance, 0, 'COMMA', 0, 'POINT')}" style="color: #C62828; font-weight:600;">₹1000</td>
-                        <td th:text="${#temporals.format(loan.nextDueDate, 'MMM dd, yyyy')}">Date</td>
+                        <td th:text="${loan.tenureMonths + 'm @ ' + loan.interestRate + '%'}">12m @ 10%</td>
+                        <td th:text="${loan.nextDueDate != null ? #temporals.format(loan.nextDueDate, 'MMM dd, yyyy') : 'N/A'}">Date</td>
+                        <td th:text="${'₹' + #numbers.formatDecimal(loan.getOutstandingBalance(), 0, 'COMMA', 0, 'POINT')}" style="color: #C62828; font-weight:600;">₹1000</td>
                         <td>
-                            <span th:class="${'badge-status badge-' + loan.status.toLowerCase()}" th:text="${loan.status}">Active</span>
-                            <button th:if="${loan.status == 'Active' || loan.status == 'Overdue'}" class="btn btn-sm ms-2" style="background:#E8F5E9; color:#2E7D32; font-weight:600; font-size: 0.75rem;" data-bs-toggle="modal" th:data-bs-target="${'#payModal' + loan.id}">Pay</button>
+                            <span th:class="${'badge-status badge-' + (loan.status != null ? loan.status.toLowerCase() : 'unknown')}" th:text="${loan.status != null ? loan.status : 'Unknown'}">Active</span>
+                        </td>
+                        <td class="align-middle">
+                            <div class="progress" style="height: 6px; width: 60px;">
+                                <div class="progress-bar" role="progressbar" th:style="${'width: ' + loan.getCompletionPercent() + '%; background-color: #2E7D32;'}"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <a th:href="@{'/loans/' + ${loan.id}}" class="btn btn-sm btn-light">Details</a>
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(loans)}">
-                        <td colspan="6" class="text-center text-muted py-4">No loans active. Add a loan above!</td>
+                        <td colspan="9" class="text-center text-muted py-4">No loans active. Add a loan above!</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Payment Modals -->
-    <div th:each="l : ${loans}" th:if="${l.status == 'Active' || l.status == 'Overdue'}" class="modal fade" th:id="${'payModal' + l.id}" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content" style="border-radius: 12px; border: none;">
-                <div class="modal-header" style="border-bottom: 1px solid #f0f0f0;">
-                    <h5 class="modal-title fw-bold" th:text="${'Record Payment - ' + l.loanReference}">Record Payment</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form th:action="@{/loans/pay}" method="post">
-                    <input type="hidden" name="loanId" th:value="${l.id}">
-                    <div class="modal-body p-4">
-                        <div class="mb-3">
-                            <label class="form-label text-muted fw-semibold" style="font-size: 0.85rem;">Amount Received (₹) *</label>
-                            <input type="number" name="amount" class="form-control" min="1" required>
-                            <small class="text-muted" th:text="${'Pending Balance: ₹' + #numbers.formatDecimal(l.outstandingBalance, 0, 'COMMA', 0, 'POINT')}"></small>
-                        </div>
-                    </div>
-                    <div class="modal-footer" style="border-top: 1px solid #f0f0f0;">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn" style="background:#27AE60; color:#fff; font-weight:600;">Confirm Payment</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <!-- Add Loan Modal -->
-    <div class="modal fade" id="addLoanModal" tabindex="-1" aria-labelledby="addLoanModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+    <div class="modal fade" id="addLoanModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content" style="border-radius: 12px; border: none;">
-                <div class="modal-header" style="border-bottom: 1px solid #f0f0f0;">
-                    <h5 class="modal-title fw-bold" id="addLoanModalLabel">Add New Loan</h5>
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title fw-bold">Add New Loan</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form th:action="@{/loans/add}" th:object="${newLoan}" method="post">
                     <div class="modal-body p-4">
                         
-                        <div class="mb-3">
-                            <label class="form-label text-muted fw-semibold" style="font-size: 0.85rem;">Select Borrower *</label>
-                            <select name="borrowerId" class="form-select" required>
-                                <option value="" disabled selected>Select an existing borrower</option>
-                                <option th:each="b : ${borrowers}" th:value="${b.id}" th:text="${b.name} + ' (' + ${b.phone} + ')'"></option>
-                            </select>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Select Borrower *</label>
+                                <select name="borrowerId" id="borrowerSelect" class="form-select" required>
+                                    <option value="" disabled selected>Search borrower...</option>
+                                    <option th:each="b : ${borrowers}" 
+                                            th:value="${b.id}" 
+                                            th:attr="data-risk=${b.riskProfile}"
+                                            th:text="${b.name} + ' (' + ${b.phone} + ') - ' + ${b.riskProfile} + ' Risk'"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Issue Date *</label>
+                                <input type="date" name="issueDate" class="form-control" required th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
+                            </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-12 mb-3">
-                                <label class="form-label text-muted fw-semibold" style="font-size: 0.85rem;">Principal Amount (₹) *</label>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Principal Amount (₹) *</label>
                                 <input type="number" th:field="*{principalAmount}" class="form-control" required min="1">
                             </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Purpose</label>
+                                <input type="text" th:field="*{purpose}" class="form-control" placeholder="e.g. Stock Purchase">
+                            </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-6 mb-3">
-                                <label class="form-label text-muted fw-semibold" style="font-size: 0.85rem;">Interest Rate (%)</label>
-                                <input type="number" step="0.1" th:field="*{interestRate}" class="form-control" value="0.0">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Annual Interest Rate (%) *</label>
+                                <input type="number" step="0.1" th:field="*{interestRate}" id="interestRateInput" class="form-control" value="0.0">
+                                <small class="text-muted" id="riskNote">Select borrower to set rate</small>
                             </div>
-                            <div class="col-6 mb-3">
-                                <label class="form-label text-muted fw-semibold" style="font-size: 0.85rem;">Next Due Date *</label>
-                                <input type="date" th:field="*{nextDueDate}" class="form-control" required>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Tenure (Months) *</label>
+                                <input type="number" th:field="*{tenureMonths}" class="form-control" value="12" min="1" required>
+                                <small class="text-muted">Will calc EMI schedule</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Repayment Type</label>
+                                <select th:field="*{repaymentType}" class="form-select">
+                                    <option value="EMI">Monthly EMI</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold mt-3 mb-3">Penalty Configuration</h6>
+                        <div class="row" style="background:var(--bg-body); padding:15px; border-radius:8px; margin:0;">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label class="form-label">Late Fee Per Day (₹)</label>
+                                <input type="number" th:field="*{lateFeePerDay}" class="form-control" value="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Flat Late Fee (₹)</label>
+                                <input type="number" th:field="*{lateFeeFlat}" class="form-control" value="0">
                             </div>
                         </div>
                         
                     </div>
-                    <div class="modal-footer" style="border-top: 1px solid #f0f0f0;">
+                    <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn" style="background:#FFB800; color:#000; font-weight:600;">Issue Loan</button>
+                        <button type="submit" class="btn" style="background:#FFB800; color:#000; font-weight:600;">Issue Loan & Generate EMIs</button>
                     </div>
                 </form>
             </div>
@@ -127,5 +151,46 @@
     </div>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>
+    <!-- Simple client-side search -->
+    <script>
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            let filter = this.value.toLowerCase();
+            let rows = document.querySelectorAll('#loansTable tbody tr');
+            
+            rows.forEach(row => {
+                if (row.children.length > 1) {
+                    let text = row.querySelector('.searchable').textContent.toLowerCase() + 
+                               row.querySelectorAll('.searchable')[1].textContent.toLowerCase();
+                    row.style.display = text.includes(filter) ? '' : 'none';
+                }
+            });
+        });
+
+        // Risk-based Interest Rate Logic
+        document.getElementById('borrowerSelect').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const risk = selectedOption.getAttribute('data-risk');
+            const rateInput = document.getElementById('interestRateInput');
+            const riskNote = document.getElementById('riskNote');
+            
+            let rate = 0;
+            let theme = 'text-muted';
+            
+            if (risk === 'Low') {
+                rate = 13.0;
+                theme = 'text-success';
+            } else if (risk === 'Medium') {
+                rate = 22.0;
+                theme = 'text-warning';
+            } else if (risk === 'High') {
+                rate = 40.0;
+                theme = 'text-danger';
+            }
+            
+            rateInput.value = rate.toFixed(1);
+            riskNote.textContent = `${risk} Risk Level (Auto-set to ${rate}%)`;
+            riskNote.className = `small fw-bold ${theme}`;
+        });
+    </script>
 </body>
 </html>

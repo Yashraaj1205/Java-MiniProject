@@ -14,8 +14,15 @@ public class DashboardSummaryDTO {
     private String collectionRate;
     private long overdueLoans;
     
+    private BigDecimal totalInterestEarned;
+    private BigDecimal totalLateFees;
+    private BigDecimal totalExpenses;
+    private BigDecimal netProfit;
+    
     // Analytics Collections
     private List<Long> statusCounts;
     private List<String> chartMonths;
     private List<BigDecimal> monthlyDisbursements;
+    private List<BigDecimal> monthlyCollections;
+    private List<BigDecimal> monthlyExpenses;
 }

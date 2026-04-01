@@ -5,9 +5,7 @@ import com.lendflow.repository.BorrowerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/borrowers")
@@ -18,9 +16,16 @@ public class BorrowerController {
 
     @GetMapping
     public String listBorrowers(Model model) {
-        model.addAttribute("borrowers", borrowerRepository.findAll());
+        model.addAttribute("borrowers", borrowerRepository.findAllByOrderByDateAddedDesc());
         model.addAttribute("newBorrower", new Borrower());
         return "borrowers";
+    }
+
+    @GetMapping("/{id}")
+    public String borrowerDetails(@PathVariable Long id, Model model) {
+        Borrower borrower = borrowerRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid borrower ID"));
+        model.addAttribute("borrower", borrower);
+        return "borrower-detail";
     }
 
     @PostMapping("/add")

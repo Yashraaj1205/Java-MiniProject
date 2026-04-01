@@ -18,34 +18,51 @@
             </button>
         </div>
         <p class="page-subtitle">Manage your customer database</p>
+
+        <!-- Duplicate Phone Alert -->
+        <div th:if="${duplicateError}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert" style="border-radius: 12px; border: none; background: rgba(198,40,40,0.1); color: #C62828;">
+            <i class="fa-solid fa-circle-exclamation me-2"></i>
+            <strong th:text="${duplicateError}">Error!</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
         
         <div class="table-card mt-4">
-            <h5 class="fw-bold mb-3">Borrowers List</h5>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold m-0">Borrowers List</h5>
+                <div class="search-wrapper">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search by name or phone...">
+                </div>
+            </div>
             
-            <table class="table table-borderless">
+            <table class="table table-borderless" id="borrowerTable">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Name</th>
+                        <th>Business Name</th>
                         <th>Phone</th>
-                        <th>Total Pending</th>
+                        <th>Active Loans</th>
+                        <th>Outstanding Amount</th>
                         <th>Risk Profile</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="borrower : ${borrowers}">
-                        <td th:text="${borrower.id}">1</td>
-                        <td th:text="${borrower.name}" class="fw-bold" style="color:#11142D;">Name</td>
-                        <td th:text="${borrower.phone}">Phone</td>
-                        <td th:text="${'₹' + #numbers.formatDecimal(borrower.totalPendingAmount, 0, 'COMMA', 0, 'POINT')}" style="color: #C62828; font-weight: 600;">₹0</td>
+                        <td th:text="${borrower.name}" class="fw-bold searchable" style="color:var(--text-main);">Name</td>
+                        <td th:text="${borrower.businessName != null ? borrower.businessName : '-'}" class="text-muted">Business</td>
+                        <td th:text="${borrower.phone}" class="searchable">Phone</td>
+                        <td th:text="${borrower.getActiveLoansCount()}">0</td>
+                        <td th:text="${'₹' + #numbers.formatDecimal(borrower.getTotalPendingAmount(), 0, 'COMMA', 0, 'POINT')}" style="color: #C62828; font-weight: 600;">₹0</td>
                         <td>
                             <span th:if="${borrower.riskProfile == 'Low'}" class="badge-status badge-active">Low Risk</span>
                             <span th:if="${borrower.riskProfile == 'Medium'}" class="badge-status badge-completed">Medium Risk</span>
                             <span th:if="${borrower.riskProfile == 'High'}" class="badge-status badge-overdue">High Risk</span>
                         </td>
+                        <td><a th:href="@{'/borrowers/' + ${borrower.id}}" class="btn btn-sm btn-light">View Profile</a></td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(borrowers)}">
-                        <td colspan="5" class="text-center text-muted py-4">No borrowers found. Add your first customer!</td>
+                        <td colspan="7" class="text-center text-muted py-4">No borrowers found. Add your first customer!</td>
                     </tr>
                 </tbody>
             </table>
@@ -53,29 +70,49 @@
     </div>
 
     <!-- Add Borrower Modal -->
-    <div class="modal fade" id="addBorrowerModal" tabindex="-1" aria-labelledby="addBorrowerModalLabel" aria-hidden="true">
+    <div class="modal fade" id="addBorrowerModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content" style="border-radius: 12px; border: none;">
-                <div class="modal-header" style="border-bottom: 1px solid #f0f0f0;">
-                    <h5 class="modal-title fw-bold" id="addBorrowerModalLabel">Add New Borrower</h5>
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h5 class="modal-title fw-bold">Add New Borrower</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form th:action="@{/borrowers/add}" th:object="${newBorrower}" method="post">
                     <div class="modal-body p-4">
                         <div class="mb-3">
-                            <label class="form-label text-muted fw-semibold" style="font-size: 0.85rem;">Full Name *</label>
+                            <label class="form-label">Full Name *</label>
                             <input type="text" th:field="*{name}" class="form-control" required placeholder="e.g. Rahul Sharma">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label text-muted fw-semibold" style="font-size: 0.85rem;">Phone Number *</label>
-                            <input type="tel" th:field="*{phone}" class="form-control" required placeholder="+91 9999999999">
+                            <label class="form-label">Business Name</label>
+                            <input type="text" th:field="*{businessName}" class="form-control" placeholder="e.g. Sharma Grocery">
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Phone Number *</label>
+                                <input type="tel" th:field="*{phone}" class="form-control" required placeholder="10-digit number">
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Business Type *</label>
+                                <select th:field="*{businessType}" class="form-select" required>
+                                    <option value="Retail">Retail</option>
+                                    <option value="Wholesale">Wholesale</option>
+                                    <option value="Service">Service</option>
+                                    <option value="Manufacturing">Manufacturing</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label text-muted fw-semibold" style="font-size: 0.85rem;">Address</label>
-                            <textarea th:field="*{address}" class="form-control" rows="2" placeholder="Shop Street, City"></textarea>
+                            <label class="form-label">ID Proof Reference</label>
+                            <input type="text" th:field="*{identityProof}" class="form-control" placeholder="Aadhar or PAN number">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label text-muted fw-semibold" style="font-size: 0.85rem;">Risk Profile *</label>
+                            <label class="form-label">Address</label>
+                            <textarea th:field="*{address}" class="form-control" rows="2" placeholder="Shop address"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Risk Profile *</label>
                             <select th:field="*{riskProfile}" class="form-select" required>
                                 <option value="Low">Low Risk</option>
                                 <option value="Medium">Medium Risk</option>
@@ -83,9 +120,9 @@
                             </select>
                         </div>
                     </div>
-                    <div class="modal-footer" style="border-top: 1px solid #f0f0f0;">
+                    <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn" style="background:#FFB800; color:#000; font-weight:600;">Save Borrower</button>
+                        <button type="submit" class="btn" style="background:#FFB800; color:#000; font-weight:600;">Save</button>
                     </div>
                 </form>
             </div>
@@ -93,5 +130,20 @@
     </div>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>
+    <!-- Simple client-side search -->
+    <script>
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            let filter = this.value.toLowerCase();
+            let rows = document.querySelectorAll('#borrowerTable tbody tr');
+            
+            rows.forEach(row => {
+                if (row.children.length > 1) { // Skip empty state row
+                    let text = row.querySelector('.searchable').textContent.toLowerCase() + 
+                               row.querySelectorAll('.searchable')[1].textContent.toLowerCase();
+                    row.style.display = text.includes(filter) ? '' : 'none';
+                }
+            });
+        });
+    </script>
 </body>
 </html>

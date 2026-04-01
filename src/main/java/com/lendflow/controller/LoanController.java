@@ -1,16 +1,18 @@
 package com.lendflow.controller;
 
-import com.lendflow.entity.Borrower;
 import com.lendflow.entity.Loan;
+import com.lendflow.service.LoanService;
 import com.lendflow.repository.BorrowerRepository;
 import com.lendflow.repository.LoanRepository;
+import com.lendflow.entity.Borrower;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
-import java.util.UUID;
+import java.math.BigDecimal;
 
 @Controller
 @RequestMapping("/loans")
@@ -19,6 +21,7 @@ public class LoanController {
 
     private final LoanRepository loanRepository;
     private final BorrowerRepository borrowerRepository;
+    private final LoanService loanService;
 
     @GetMapping
     public String listLoans(Model model) {
@@ -28,48 +31,30 @@ public class LoanController {
         return "loans";
     }
 
+    @GetMapping("/{id}")
+    public String loanDetails(@PathVariable Long id, Model model) {
+        Loan loan = loanRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid loan ID"));
+        model.addAttribute("loan", loan);
+        return "loan-detail";
+    }
+
     @PostMapping("/add")
-    public String addLoan(@ModelAttribute Loan newLoan, @RequestParam Long borrowerId) {
-        Borrower borrower = borrowerRepository.findById(borrowerId).orElseThrow(() -> new IllegalArgumentException("Invalid borrower Id:" + borrowerId));
-        newLoan.setBorrower(borrower);
-        newLoan.setLoanReference("LN-" + UUID.randomUUID().toString().substring(0, 5).toUpperCase());
-        newLoan.setStatus("Active");
-        
-        if(newLoan.getIssueDate() == null) {
-            newLoan.setIssueDate(LocalDate.now());
-        }
-        if(newLoan.getInterestRate() == null) {
-            newLoan.setInterestRate(0.0);
-        }
-        
-        // Auto-calculate Expected EMI based on Principal + Interest over a standard 12-month period
-        java.math.BigDecimal principal = newLoan.getPrincipalAmount() == null ? java.math.BigDecimal.ZERO : newLoan.getPrincipalAmount();
-        double rate = newLoan.getInterestRate() / 100.0;
-        java.math.BigDecimal totalAmount = principal.add(principal.multiply(java.math.BigDecimal.valueOf(rate)));
-        newLoan.setEmiAmount(totalAmount.divide(java.math.BigDecimal.valueOf(12), java.math.RoundingMode.HALF_UP));
-        
-        loanRepository.save(newLoan);
+    public String addLoan(@ModelAttribute Loan newLoan, @RequestParam Long borrowerId, @RequestParam(required=false) @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate issueDate) {
+        Borrower borrower = borrowerRepository.findById(borrowerId).orElseThrow(() -> new IllegalArgumentException("Invalid borrower Id"));
+        if (issueDate != null) newLoan.setIssueDate(issueDate);
+        loanService.createLoan(newLoan, borrower);
         return "redirect:/loans";
     }
 
     @PostMapping("/pay")
-    public String recordPayment(@RequestParam Long loanId, @RequestParam java.math.BigDecimal amount) {
-        Loan loan = loanRepository.findById(loanId).orElseThrow();
+    public String recordPayment(
+            @RequestParam Long loanId, 
+            @RequestParam BigDecimal amount,
+            @RequestParam(defaultValue = "Cash") String paymentMethod,
+            @RequestParam(required = false) String notes,
+            @RequestParam(required = false) BigDecimal lateFeePaid) {
         
-        com.lendflow.entity.Payment payment = com.lendflow.entity.Payment.builder()
-                .loan(loan)
-                .amountPaid(amount)
-                .paymentDate(LocalDate.now())
-                .build();
-                
-        if(loan.getPayments() == null) loan.setPayments(new java.util.ArrayList<>());
-        loan.getPayments().add(payment);
-        
-        if(loan.getOutstandingBalance().compareTo(java.math.BigDecimal.ZERO) <= 0) {
-            loan.setStatus("Completed");
-        }
-        
-        loanRepository.save(loan);
-        return "redirect:/loans";
+        loanService.recordPayment(loanId, amount, paymentMethod, notes, lateFeePaid);
+        return "redirect:/loans/" + loanId;
     }
 }
