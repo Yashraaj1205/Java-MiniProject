@@ -1,25 +1,26 @@
 package com.lendflow.controller;
 
-import com.lendflow.entity.Loan;
-import com.lendflow.repository.LoanRepository;
+import com.lendflow.repository.EMIScheduleRepository;
+import com.lendflow.service.RecoveryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 
 @ControllerAdvice
 @RequiredArgsConstructor
 public class GlobalControllerAdvice {
 
-    private final LoanRepository loanRepository;
+    private final EMIScheduleRepository emiScheduleRepository;
+    private final RecoveryService recoveryService;
 
     @ModelAttribute("notificationCount")
     public long getNotificationCount() {
-        return loanRepository.findAll().stream()
-                .filter(l -> !"Completed".equalsIgnoreCase(l.getStatus()))
-                .filter(l -> ChronoUnit.DAYS.between(LocalDate.now(), l.getNextDueDate()) <= 1)
-                .count();
+        long approaching = emiScheduleRepository.findByStatusAndDueDateBefore("Pending", LocalDate.now().plusDays(2)).size();
+        long overdue = emiScheduleRepository.findAll().stream().filter(e -> "Overdue".equals(e.getStatus())).count();
+        long followups = recoveryService.getPendingFollowUps().size();
+        
+        return approaching + overdue + followups;
     }
 }

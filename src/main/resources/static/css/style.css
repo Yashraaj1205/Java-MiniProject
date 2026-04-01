@@ -16,13 +16,13 @@
 }
 
 :root[data-theme="dark"] {
-    --bg-body: #000000;
-    --bg-surface: #0a0a0a;
+    --bg-body: #121212;
+    --bg-surface: #1E1E1E;
     --text-main: #F8F9FC;
     --text-muted: #A0A5B5;
     --border-color: #2D3243;
     --border-light: #2D3243;
-    --sidebar-bg: #000000;
+    --sidebar-bg: #1A1A1A;
     --stat-icon-red-bg: rgba(198, 40, 40, 0.2);
     --stat-icon-yellow-bg: rgba(245, 127, 23, 0.2);
     --stat-icon-green-bg: rgba(46, 125, 50, 0.2);
@@ -323,15 +323,22 @@ body {
 }
 
 .form-control, .form-select {
-    background-color: var(--bg-body);
-    border-color: var(--border-color);
-    color: var(--text-main);
+    background-color: var(--bg-surface) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-main) !important;
+    border-radius: 8px;
+    padding: 10px 15px;
+    transition: all 0.2s;
 }
 .form-control:focus, .form-select:focus {
-    background-color: var(--bg-body);
-    border-color: #FFB800;
-    color: var(--text-main);
-    box-shadow: 0 0 0 0.25rem rgba(255, 184, 0, 0.25);
+    background-color: var(--bg-surface) !important;
+    border-color: #FFB800 !important;
+    color: var(--text-main) !important;
+    box-shadow: 0 0 0 3px rgba(255, 184, 0, 0.15) !important;
+}
+::placeholder {
+    color: var(--text-muted) !important;
+    opacity: 0.7;
 }
 
 .modal-content {
@@ -349,3 +356,147 @@ body {
 :root[data-theme="dark"] {
     --btn-close-filter: invert(1) grayscale(100%) brightness(200%);
 }
+
+/* Theme Toggle Button (top-right corner) */
+.theme-toggle-btn {
+    position: fixed;
+    top: 20px;
+    right: 24px;
+    z-index: 1050;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: var(--bg-surface);
+    color: #FFB800;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-toggle-btn:hover {
+    transform: scale(1.12);
+    box-shadow: 0 4px 20px rgba(255, 184, 0, 0.25);
+    border-color: #FFB800;
+}
+
+.theme-toggle-btn:active {
+    transform: scale(0.95);
+}
+
+.theme-toggle-btn.active-dark {
+    background: #1a1a2e;
+    border-color: #FFB800;
+    color: #FFB800;
+    box-shadow: 0 2px 16px rgba(255, 184, 0, 0.15);
+}
+
+.theme-toggle-btn i {
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-toggle-btn:hover i {
+    transform: rotate(25deg);
+}
+
+/* Detail Pages Enhancements */
+.profile-header {
+    background: linear-gradient(135deg, var(--sidebar-bg) 0%, var(--bg-surface) 100%);
+    border-radius: 16px;
+    padding: 30px;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 24px;
+}
+:root[data-theme="dark"] .profile-header {
+    background: linear-gradient(135deg, var(--sidebar-bg) 0%, #1a1a2e 100%);
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #FFB800;
+    color: #000;
+    font-size: 2rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Timeline */
+.timeline {
+    position: relative;
+    padding-left: 30px;
+    margin-top: 20px;
+}
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 5px;
+    bottom: 5px;
+    width: 2px;
+    background: var(--border-light);
+}
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+.timeline-dot {
+    position: absolute;
+    left: -35px;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--bg-surface);
+    border: 2px solid #FFB800;
+    z-index: 1;
+}
+.timeline-content {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.search-wrapper {
+    position: relative;
+    width: 300px;
+}
+.search-wrapper i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+}
+.search-wrapper input {
+    padding-left: 40px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+}
+
+/* Status dots */
+.status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+}
+.status-dot.success { background: #2E7D32; }
+.status-dot.warning { background: #F57F17; }
+.status-dot.danger { background: #C62828; }
+.status-dot.muted { background: #6B7280; }
+

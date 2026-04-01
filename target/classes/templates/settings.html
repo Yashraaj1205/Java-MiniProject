@@ -26,42 +26,45 @@
         <p class="page-subtitle">Manage your overall dashboard configurations</p>
 
         <div class="table-card mt-4" style="max-width: 700px;">
-            <h5 class="fw-bold mb-4" style="color: var(--text-main);">Appearance</h5>
-            
+            <h5 class="fw-bold mb-4" style="color: var(--text-main);">General</h5>
+
             <div class="d-flex justify-content-between align-items-center pt-2">
                 <div>
-                    <div style="font-weight: 600; font-size: 1.05rem; color: var(--text-main);">OLED Dark Mode</div>
-                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top:2px;">Turn off the lights. Activates a pure black high-contrast appearance.</div>
+                    <div style="font-weight: 600; font-size: 1.05rem; color: var(--text-main);">Notifications</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top:2px;">Receive alerts for overdue payments and borrower updates.</div>
                 </div>
-                <!-- Native Bootstrap 5 Toggle Switch -->
                 <div class="form-check form-switch fs-4">
-                    <input class="form-check-input" type="checkbox" role="switch" id="themeToggle" style="cursor: pointer;">
+                    <input class="form-check-input" type="checkbox" role="switch" id="notifToggle" checked style="cursor: pointer;">
+                </div>
+            </div>
+
+            <hr style="border-color: var(--border-color); margin: 20px 0;">
+
+            <div class="d-flex justify-content-between align-items-center pt-2">
+                <div>
+                    <div style="font-weight: 600; font-size: 1.05rem; color: var(--text-main);">Currency</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top:2px;">Set your preferred currency for loan amounts and reports.</div>
+                </div>
+                <select class="form-select" style="width: 120px; cursor: pointer;">
+                    <option selected>₹ INR</option>
+                    <option>$ USD</option>
+                    <option>€ EUR</option>
+                    <option>£ GBP</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-card mt-4" style="max-width: 700px;">
+            <h5 class="fw-bold mb-4" style="color: var(--text-main);">Appearance</h5>
+            <div class="d-flex align-items-center gap-3 pt-2">
+                <i class="fa-solid fa-circle-info" style="color: var(--text-muted);"></i>
+                <div style="font-size: 0.9rem; color: var(--text-muted);">
+                    Use the <i class="fa-solid fa-moon" style="color: #FFB800;"></i> moon icon in the top-right corner of the page to toggle dark mode.
                 </div>
             </div>
         </div>
     </div>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const themeToggle = document.getElementById("themeToggle");
-            const currentTheme = localStorage.getItem("theme");
-            
-            if (currentTheme === "dark") {
-                themeToggle.checked = true;
-            }
-            
-            themeToggle.addEventListener("change", (e) => {
-                if (e.target.checked) {
-                    document.documentElement.setAttribute("data-theme", "dark");
-                    localStorage.setItem("theme", "dark");
-                } else {
-                    document.documentElement.removeAttribute("data-theme");
-                    localStorage.setItem("theme", "light");
-                }
-            });
-        });
-    </script>
 </body>
 </html>

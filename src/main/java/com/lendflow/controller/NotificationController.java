@@ -1,7 +1,9 @@
 package com.lendflow.controller;
 
-import com.lendflow.entity.Loan;
-import com.lendflow.repository.LoanRepository;
+import com.lendflow.entity.EMISchedule;
+import com.lendflow.entity.RecoveryAction;
+import com.lendflow.repository.EMIScheduleRepository;
+import com.lendflow.service.RecoveryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -9,36 +11,30 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/notifications")
 @RequiredArgsConstructor
 public class NotificationController {
 
-    private final LoanRepository loanRepository;
+    private final EMIScheduleRepository emiScheduleRepository;
+    private final RecoveryService recoveryService;
 
     @GetMapping
     public String viewNotifications(Model model) {
-        List<Loan> activeLoans = loanRepository.findAll().stream()
-                .filter(l -> !"Completed".equalsIgnoreCase(l.getStatus()))
-                .collect(Collectors.toList());
+        // Approaching EMIs (due tomorrow or today)
+        List<EMISchedule> approaching = emiScheduleRepository.findByStatusAndDueDateBefore("Pending", LocalDate.now().plusDays(2));
+        
+        // Overdue EMIs
+        List<EMISchedule> overdue = emiScheduleRepository.findAll().stream().filter(e -> "Overdue".equals(e.getStatus())).toList();
 
-        List<Loan> approachingDeadlines = activeLoans.stream()
-                .filter(l -> {
-                    long days = ChronoUnit.DAYS.between(LocalDate.now(), l.getNextDueDate());
-                    return days >= 0 && days <= 1; // Due strictly today or tomorrow
-                })
-                .collect(Collectors.toList());
+        // Pending Follow-Ups
+        List<RecoveryAction> followUps = recoveryService.getPendingFollowUps();
 
-        List<Loan> overdueLoans = activeLoans.stream()
-                .filter(l -> ChronoUnit.DAYS.between(LocalDate.now(), l.getNextDueDate()) < 0)
-                .collect(Collectors.toList());
-
-        model.addAttribute("approaching", approachingDeadlines);
-        model.addAttribute("overdue", overdueLoans);
+        model.addAttribute("approaching", approaching);
+        model.addAttribute("overdue", overdue);
+        model.addAttribute("followUps", followUps);
         
         return "notifications";
     }
