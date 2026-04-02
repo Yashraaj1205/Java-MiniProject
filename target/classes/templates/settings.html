@@ -1,70 +1,186 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings - LendFlow</title>
-    <!-- Inject Local Storage Theme Natively preventing unstyled flash -->
-    <script>
-        const storedTheme = localStorage.getItem('theme');
-        if (storedTheme === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-        }
-    </script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>LendFlow | Admin Settings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-dark: #7c3aed;
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --success: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .header {
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .qr-preview {
+            margin-top: 15px;
+            max-width: 200px;
+            border-radius: 12px;
+            border: 2px dashed var(--border);
+            padding: 5px;
+        }
+
+        .qr-preview img {
+            width: 100%;
+            border-radius: 8px;
+            display: block;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .back-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+    </style>
 </head>
 <body>
-
-    <div th:replace="~{fragments/layout :: sidebar('settings')}"></div>
-
-    <div class="content">
-        <div class="d-flex justify-content-between align-items-center mb-1">
-            <h1 class="page-title mb-0">Settings</h1>
-        </div>
-        <p class="page-subtitle">Manage your overall dashboard configurations</p>
-
-        <div class="table-card mt-4" style="max-width: 700px;">
-            <h5 class="fw-bold mb-4" style="color: var(--text-main);">General</h5>
-
-            <div class="d-flex justify-content-between align-items-center pt-2">
-                <div>
-                    <div style="font-weight: 600; font-size: 1.05rem; color: var(--text-main);">Notifications</div>
-                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top:2px;">Receive alerts for overdue payments and borrower updates.</div>
-                </div>
-                <div class="form-check form-switch fs-4">
-                    <input class="form-check-input" type="checkbox" role="switch" id="notifToggle" checked style="cursor: pointer;">
-                </div>
-            </div>
-
-            <hr style="border-color: var(--border-color); margin: 20px 0;">
-
-            <div class="d-flex justify-content-between align-items-center pt-2">
-                <div>
-                    <div style="font-weight: 600; font-size: 1.05rem; color: var(--text-main);">Currency</div>
-                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top:2px;">Set your preferred currency for loan amounts and reports.</div>
-                </div>
-                <select class="form-select" style="width: 120px; cursor: pointer;">
-                    <option selected>₹ INR</option>
-                    <option>$ USD</option>
-                    <option>€ EUR</option>
-                    <option>£ GBP</option>
-                </select>
+    <div class="container">
+        <div class="header">
+            <div>
+                <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Dashboard</a>
+                <h1><i class="fas fa-cog"></i> Settings</h1>
             </div>
         </div>
 
-        <div class="table-card mt-4" style="max-width: 700px;">
-            <h5 class="fw-bold mb-4" style="color: var(--text-main);">Appearance</h5>
-            <div class="d-flex align-items-center gap-3 pt-2">
-                <i class="fa-solid fa-circle-info" style="color: var(--text-muted);"></i>
-                <div style="font-size: 0.9rem; color: var(--text-muted);">
-                    Use the <i class="fa-solid fa-moon" style="color: #FFB800;"></i> moon icon in the top-right corner of the page to toggle dark mode.
+        <div th:if="${success}" class="alert alert-success">
+            <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+        </div>
+
+        <div class="card">
+            <form th:action="@{/admin/settings/update}" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="ownerName">Owner / Business Name</label>
+                    <input type="text" id="ownerName" name="ownerName" th:value="${settings.ownerName}" required placeholder="e.g. LendFlow Admin">
                 </div>
-            </div>
+
+                <div class="form-group">
+                    <label for="upiId">UPI ID for Repayments</label>
+                    <input type="text" id="upiId" name="upiId" th:value="${settings.upiId}" required placeholder="e.g. handle@upi">
+                </div>
+
+                <div class="form-group">
+                    <label for="qrCodeFile">UPI QR Code Image</label>
+                    <input type="file" id="qrCodeFile" name="qrCodeFile" accept="image/*">
+                    <div th:if="${settings.qrCodePath}" class="qr-preview">
+                        <img th:src="${settings.qrCodePath}" alt="UPI QR Code">
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <button type="submit" class="btn"><i class="fas fa-save"></i> Save Settings</button>
+                </div>
+            </form>
         </div>
     </div>
-
-    <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>
 </html>

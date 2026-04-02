@@ -1,7 +1,7 @@
 package com.lendflow.controller;
 
 import com.lendflow.entity.RecoveryAction;
-import com.lendflow.service.RecoveryService;
+import com.lendflow.service.IRecoveryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class RecoveryController {
 
-    private final RecoveryService recoveryService;
+    private final IRecoveryService recoveryService;
 
     @PostMapping("/add")
     public String addRecoveryAction(@RequestParam Long loanId, @ModelAttribute RecoveryAction action) {
@@ -19,3 +19,4 @@ public class RecoveryController {
         return "redirect:/loans/" + loanId;
     }
 }
+

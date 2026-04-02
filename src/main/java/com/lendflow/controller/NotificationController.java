@@ -2,8 +2,8 @@ package com.lendflow.controller;
 
 import com.lendflow.entity.EMISchedule;
 import com.lendflow.entity.RecoveryAction;
-import com.lendflow.repository.EMIScheduleRepository;
-import com.lendflow.service.RecoveryService;
+import com.lendflow.service.ILoanService;
+import com.lendflow.service.IRecoveryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,18 +18,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NotificationController {
 
-    private final EMIScheduleRepository emiScheduleRepository;
-    private final RecoveryService recoveryService;
+    private final ILoanService loanService;
+    private final IRecoveryService recoveryService;
 
     @GetMapping
     public String viewNotifications(Model model) {
-        // Approaching EMIs (due tomorrow or today)
-        List<EMISchedule> approaching = emiScheduleRepository.findByStatusAndDueDateBefore("Pending", LocalDate.now().plusDays(2));
-        
-        // Overdue EMIs
-        List<EMISchedule> overdue = emiScheduleRepository.findAll().stream().filter(e -> "Overdue".equals(e.getStatus())).toList();
-
-        // Pending Follow-Ups
+        List<EMISchedule> approaching = loanService.getApproachingPayments(LocalDate.now().plusDays(2));
+        List<EMISchedule> overdue = loanService.getOverduePayments();
         List<RecoveryAction> followUps = recoveryService.getPendingFollowUps();
 
         model.addAttribute("approaching", approaching);
@@ -39,3 +34,4 @@ public class NotificationController {
         return "notifications";
     }
 }
+

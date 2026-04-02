@@ -2,7 +2,7 @@ package com.lendflow.controller;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
-import com.lendflow.service.NotificationService;
+import com.lendflow.service.INotificationService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Slf4j
 public class AuthController {
 
-    private final NotificationService notificationService;
+    private final INotificationService notificationService;
 
     @GetMapping("/login")
     public String loginPage(HttpSession session) {
@@ -33,18 +33,15 @@ public class AuthController {
                                         @RequestParam(value = "fcmToken", required = false) String fcmToken,
                                         HttpSession session) {
         try {
-            // Verify the Firebase ID token
             FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
             String uid = decodedToken.getUid();
             String email = decodedToken.getEmail();
             
             log.info("User {} ({}) authenticated via Firebase", uid, email);
             
-            // Mark session as admin
             session.setAttribute("admin", true);
             session.setAttribute("adminEmail", email);
             
-            // If they provided a push notification registration token, save it for future alerts
             if (fcmToken != null && !fcmToken.isEmpty()) {
                 notificationService.registerFcmToken(fcmToken);
             }

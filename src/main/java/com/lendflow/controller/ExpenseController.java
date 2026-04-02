@@ -1,7 +1,7 @@
 package com.lendflow.controller;
 
 import com.lendflow.entity.Expense;
-import com.lendflow.service.ExpenseService;
+import com.lendflow.service.IExpenseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class ExpenseController {
 
-    private final ExpenseService expenseService;
+    private final IExpenseService expenseService;
 
     @GetMapping
     public String listExpenses(Model model) {
@@ -33,3 +33,4 @@ public class ExpenseController {
         return "redirect:/expenses";
     }
 }
+

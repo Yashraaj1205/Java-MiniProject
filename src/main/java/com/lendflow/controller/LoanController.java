@@ -1,9 +1,8 @@
 package com.lendflow.controller;
 
 import com.lendflow.entity.Loan;
-import com.lendflow.service.LoanService;
-import com.lendflow.repository.BorrowerRepository;
-import com.lendflow.repository.LoanRepository;
+import com.lendflow.service.ILoanService;
+import com.lendflow.service.IBorrowerService;
 import com.lendflow.entity.Borrower;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -19,28 +18,31 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class LoanController {
 
-    private final LoanRepository loanRepository;
-    private final BorrowerRepository borrowerRepository;
-    private final LoanService loanService;
+    private final ILoanService loanService;
+    private final IBorrowerService borrowerService;
 
     @GetMapping
     public String listLoans(Model model) {
-        model.addAttribute("loans", loanRepository.findAll());
-        model.addAttribute("borrowers", borrowerRepository.findAll());
+        model.addAttribute("loans", loanService.getAllLoans());
+        model.addAttribute("borrowers", borrowerService.getAllBorrowers());
         model.addAttribute("newLoan", new Loan());
         return "loans";
     }
 
     @GetMapping("/{id}")
     public String loanDetails(@PathVariable Long id, Model model) {
-        Loan loan = loanRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid loan ID"));
+        Loan loan = loanService.getLoanById(id);
         model.addAttribute("loan", loan);
         return "loan-detail";
     }
 
     @PostMapping("/add")
-    public String addLoan(@ModelAttribute Loan newLoan, @RequestParam Long borrowerId, @RequestParam(required=false) @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate issueDate) {
-        Borrower borrower = borrowerRepository.findById(borrowerId).orElseThrow(() -> new IllegalArgumentException("Invalid borrower Id"));
+    public String addLoan(
+            @ModelAttribute Loan newLoan, 
+            @RequestParam Long borrowerId, 
+            @RequestParam(required=false) @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate issueDate) {
+            
+        Borrower borrower = borrowerService.getBorrowerById(borrowerId);
         if (issueDate != null) newLoan.setIssueDate(issueDate);
         loanService.createLoan(newLoan, borrower);
         return "redirect:/loans";
@@ -58,3 +60,4 @@ public class LoanController {
         return "redirect:/loans/" + loanId;
     }
 }
+

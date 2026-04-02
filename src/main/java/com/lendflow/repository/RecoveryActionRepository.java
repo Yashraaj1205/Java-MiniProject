@@ -13,3 +13,4 @@ public interface RecoveryActionRepository extends JpaRepository<RecoveryAction, 
     List<RecoveryAction> findByFollowUpDateBeforeAndOutcomeNot(LocalDate date, String outcome);
     List<RecoveryAction> findByOutcome(String outcome);
 }
+

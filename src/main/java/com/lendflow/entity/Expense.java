@@ -11,13 +11,12 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Expense {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@EqualsAndHashCode(callSuper = true)
+public class Expense extends BaseEntity {
+
 
     @Column(nullable = false)
-    private String category; // Rent, Salary, Stock, Utility, Transport, Marketing, Misc
+    private String category; 
 
     @Column(nullable = false)
     private BigDecimal amount;
@@ -30,5 +29,6 @@ public class Expense {
 
     @Column(nullable = false)
     @Builder.Default
-    private String paymentMethod = "Cash"; // Cash, UPI, Bank Transfer, Cheque
+    private String paymentMethod = "Cash"; 
 }
+

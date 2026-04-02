@@ -12,7 +12,7 @@
     <div th:replace="~{fragments/layout :: sidebar('loans')}"></div>
 
     <div class="content">
-        <!-- Header -->
+        
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <a th:href="@{/loans}" style="text-decoration: none; color: var(--text-muted);"><i class="fa-solid fa-arrow-left me-2"></i>Back to Loans</a>
@@ -30,7 +30,7 @@
 
         <div class="row mb-4">
             <div class="col-md-8">
-                <!-- Loan Summary Card -->
+                
                 <div class="stat-card" style="height: 100%;">
                     <div class="d-flex justify-content-between align-items-start mb-4">
                         <div>
@@ -74,7 +74,7 @@
             </div>
             
             <div class="col-md-4">
-                <!-- Progress Card -->
+                
                 <div class="stat-card" style="height: 100%;">
                     <div class="stat-title">Repayment Progress</div>
                     
@@ -97,7 +97,7 @@
 
         <div class="row">
             <div class="col-md-8">
-                <!-- EMI Schedule -->
+                
                 <div class="table-card mb-4">
                     <h5 class="fw-bold mb-3">EMI Schedule</h5>
                     <table class="table table-borderless">
@@ -130,7 +130,7 @@
                     </table>
                 </div>
 
-                <!-- Recovery Actions -->
+                
                 <div class="table-card" th:if="${!#lists.isEmpty(loan.recoveryActions)}">
                     <h5 class="fw-bold mb-3">Recovery Actions</h5>
                     <div class="timeline">
@@ -150,7 +150,7 @@
             </div>
 
             <div class="col-md-4">
-                <!-- Payment History -->
+                
                 <div class="table-card">
                     <h5 class="fw-bold mb-3">Payment History</h5>
                     <div th:if="${#lists.isEmpty(loan.payments)}" class="text-muted text-center py-4">No payments yet.</div>
@@ -173,8 +173,8 @@
         </div>
     </div>
 
-    <!-- Modals -->
-    <!-- Pay Modal -->
+    
+    
     <div class="modal fade" id="payModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content" style="border-radius: 12px; border: none;">
@@ -218,7 +218,7 @@
         </div>
     </div>
 
-    <!-- Recovery Modal -->
+    
     <div class="modal fade" id="recoveryModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content" style="border-radius: 12px; border: none;">
@@ -269,3 +269,4 @@
     <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>
 </html>
+

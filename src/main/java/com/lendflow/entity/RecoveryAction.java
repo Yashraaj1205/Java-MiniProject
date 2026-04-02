@@ -10,13 +10,12 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RecoveryAction {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@EqualsAndHashCode(callSuper = true)
+public class RecoveryAction extends BaseEntity {
+
 
     @Column(nullable = false)
-    private String actionType; // Phone Call, Visit, WhatsApp, SMS, Legal Notice, Settlement Offer
+    private String actionType; 
 
     @Column(nullable = false)
     private LocalDate actionDate;
@@ -26,7 +25,7 @@ public class RecoveryAction {
 
     @Column(nullable = false)
     @Builder.Default
-    private String outcome = "Pending"; // Successful, Partial, No Response, Promise to Pay, Pending
+    private String outcome = "Pending"; 
 
     private LocalDate followUpDate;
 
@@ -34,3 +33,4 @@ public class RecoveryAction {
     @JoinColumn(name = "loan_id", nullable = false)
     private Loan loan;
 }
+

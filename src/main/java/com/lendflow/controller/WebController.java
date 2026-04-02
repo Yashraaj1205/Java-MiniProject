@@ -1,6 +1,6 @@
 package com.lendflow.controller;
 
-import com.lendflow.service.DashboardService;
+import com.lendflow.service.IDashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RequiredArgsConstructor
 public class WebController {
 
-    private final DashboardService dashboardService;
+    private final IDashboardService dashboardService;
 
     @GetMapping("/")
     public String index() {
@@ -29,3 +29,4 @@ public class WebController {
         return "settings";
     }
 }
+

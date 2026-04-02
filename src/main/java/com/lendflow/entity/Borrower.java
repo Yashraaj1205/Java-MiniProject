@@ -1,6 +1,7 @@
 package com.lendflow.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import java.util.List;
 import java.math.BigDecimal;
@@ -12,28 +13,25 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Borrower {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@EqualsAndHashCode(callSuper = true)
+public class Borrower extends BaseEntity {
     
     @Column(nullable = false)
     private String name;
-    
+
     @Column(nullable = false, unique = true)
+    @Pattern(regexp = "^\\d{10}$", message = "Phone must be exactly 10 digits")
     private String phone;
     
     private String address;
-
     private String email;
-
     private String businessName;
 
     @Column(nullable = false)
     @Builder.Default
-    private String businessType = "Retail"; // Retail, Wholesale, Service, Manufacturing, Other
+    private String businessType = "Retail"; 
 
-    private String identityProof; // Aadhaar/PAN reference
+    private String identityProof; 
 
     @Column(nullable = false)
     @Builder.Default
@@ -41,7 +39,7 @@ public class Borrower {
     
     @Column(nullable = false)
     @Builder.Default
-    private String riskProfile = "Low"; // Low, Medium, High
+    private String riskProfile = "Low"; 
     
     @OneToMany(mappedBy = "borrower", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Loan> loans;

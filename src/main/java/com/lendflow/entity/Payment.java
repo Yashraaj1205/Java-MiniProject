@@ -11,10 +11,9 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Payment {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@EqualsAndHashCode(callSuper = true)
+public class Payment extends BaseEntity {
+
 
     @Column(nullable = false)
     private BigDecimal amountPaid;
@@ -33,7 +32,7 @@ public class Payment {
 
     @Column(nullable = false)
     @Builder.Default
-    private String paymentMethod = "Cash"; // Cash, UPI, Bank Transfer, Cheque
+    private String paymentMethod = "Cash"; 
 
     @Column(length = 500)
     private String notes;
@@ -42,3 +41,4 @@ public class Payment {
     @JoinColumn(name = "loan_id", nullable = false)
     private Loan loan;
 }
+

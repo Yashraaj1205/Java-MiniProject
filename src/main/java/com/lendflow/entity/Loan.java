@@ -13,52 +13,51 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Loan {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@EqualsAndHashCode(callSuper = true)
+public class Loan extends BaseEntity {
     
     @Column(unique = true, nullable = false)
-    private String loanReference; // e.g., LN-004
+    private String loanReference;
+
     
     @Column(nullable = false)
     private BigDecimal principalAmount;
     
     @Column(nullable = false)
-    private BigDecimal emiAmount; // Monthly payment amount
+    private BigDecimal emiAmount; 
 
     @Builder.Default
-    private Double interestRate = 0.0; // Annual interest rate %
+    private Double interestRate = 0.0; 
 
     @Builder.Default
-    private Integer tenureMonths = 12; // Repayment tenure in months
+    private Integer tenureMonths = 12; 
 
     @Column(nullable = false)
     @Builder.Default
-    private String repaymentType = "EMI"; // EMI, Lump Sum, Weekly, Custom
+    private String repaymentType = "EMI"; 
 
     @Builder.Default
-    private BigDecimal lateFeePerDay = BigDecimal.ZERO; // Penalty per day late
+    private BigDecimal lateFeePerDay = BigDecimal.ZERO; 
 
     @Builder.Default
-    private BigDecimal lateFeeFlat = BigDecimal.ZERO; // One-time flat late fee per missed EMI
+    private BigDecimal lateFeeFlat = BigDecimal.ZERO; 
 
-    private String purpose; // What the loan is for (Stock Purchase, Equipment, etc.)
+    private String purpose; 
 
     @Column(length = 500)
-    private String notes; // Free-text notes
+    private String notes; 
     
     @Column(nullable = false)
     private LocalDate issueDate;
 
     @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
-    private LocalDate endDate; // User selected maturity date
+    private LocalDate endDate; 
     
     @Column(nullable = false)
-    private LocalDate nextDueDate; // Next due date
+    private LocalDate nextDueDate; 
     
     @Column(nullable = false)
-    private String status; // Active, Overdue, Completed, Settled
+    private String status; 
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "borrower_id", nullable = false)
@@ -76,15 +75,12 @@ public class Loan {
     @OrderBy("actionDate DESC")
     private List<RecoveryAction> recoveryActions;
 
-    /**
-     * Calculate total payable using exact days:
-     * Total = Principal + (Principal × Rate/100 × Days/365)
-     */
+    
     public BigDecimal getTotalPayable() {
         BigDecimal total = principalAmount;
         if (interestRate != null && interestRate > 0 && issueDate != null && endDate != null) {
             long actualDays = java.time.temporal.ChronoUnit.DAYS.between(issueDate, endDate);
-            if (actualDays <= 0) actualDays = 1; // Minimum 1 day of interest just in case it's same day
+            if (actualDays <= 0) actualDays = 1; 
 
             BigDecimal interest = principalAmount
                     .multiply(BigDecimal.valueOf(interestRate))
@@ -95,24 +91,18 @@ public class Loan {
         return total;
     }
 
-    /**
-     * Calculate total interest amount
-     */
+    
     public BigDecimal getTotalInterest() {
         return getTotalPayable().subtract(principalAmount);
     }
 
-    /**
-     * Outstanding balance = Total Payable - Total Paid
-     */
+    
     public BigDecimal getOutstandingBalance() {
         BigDecimal paid = getTotalPaid();
         return getTotalPayable().subtract(paid);
     }
 
-    /**
-     * Total amount paid across all payments
-     */
+    
     public BigDecimal getTotalPaid() {
         if (payments == null || payments.isEmpty()) return BigDecimal.ZERO;
         return payments.stream()
@@ -120,9 +110,7 @@ public class Loan {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    /**
-     * Total late fees accrued across all payments
-     */
+    
     public BigDecimal getTotalLateFees() {
         if (payments == null || payments.isEmpty()) return BigDecimal.ZERO;
         return payments.stream()
@@ -130,9 +118,7 @@ public class Loan {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    /**
-     * Get completion percentage
-     */
+    
     public int getCompletionPercent() {
         BigDecimal total = getTotalPayable();
         if (total.compareTo(BigDecimal.ZERO) == 0) return 100;
@@ -142,9 +128,7 @@ public class Loan {
                 .intValue();
     }
 
-    /**
-     * Get number of paid installments
-     */
+    
     public long getPaidInstallments() {
         if (emiSchedules == null) return 0;
         return emiSchedules.stream()
@@ -152,9 +136,7 @@ public class Loan {
                 .count();
     }
 
-    /**
-     * Get number of overdue installments
-     */
+    
     public long getOverdueInstallments() {
         if (emiSchedules == null) return 0;
         return emiSchedules.stream()
@@ -162,3 +144,4 @@ public class Loan {
                 .count();
     }
 }
+

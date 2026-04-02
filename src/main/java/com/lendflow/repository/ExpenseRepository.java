@@ -22,3 +22,4 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     @Query("SELECT e.category, SUM(e.amount) FROM Expense e WHERE e.expenseDate BETWEEN :start AND :end GROUP BY e.category ORDER BY SUM(e.amount) DESC")
     List<Object[]> sumByCategoryBetween(@Param("start") LocalDate start, @Param("end") LocalDate end);
 }
+

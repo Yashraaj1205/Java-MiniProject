@@ -11,10 +11,9 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class EMISchedule {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@EqualsAndHashCode(callSuper = true)
+public class EMISchedule extends BaseEntity {
+
 
     @Column(nullable = false)
     private Integer installmentNumber;
@@ -38,7 +37,7 @@ public class EMISchedule {
 
     @Column(nullable = false)
     @Builder.Default
-    private String status = "Pending"; // Pending, Paid, Overdue, Partial
+    private String status = "Pending"; 
 
     @Builder.Default
     private BigDecimal paidAmount = BigDecimal.ZERO;
@@ -49,3 +48,4 @@ public class EMISchedule {
     @JoinColumn(name = "loan_id", nullable = false)
     private Loan loan;
 }
+

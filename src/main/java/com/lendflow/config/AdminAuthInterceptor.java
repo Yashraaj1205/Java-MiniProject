@@ -13,7 +13,6 @@ public class AdminAuthInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String uri = request.getRequestURI();
 
-        // Allow static assets, error pages, and login-related endpoints
         if (uri.startsWith("/css/") || uri.startsWith("/js/") || uri.startsWith("/images/") 
                 || uri.startsWith("/webjars/") || uri.equals("/login") 
                 || uri.startsWith("/api/auth/") || uri.equals("/error")) {
@@ -22,11 +21,11 @@ public class AdminAuthInterceptor implements HandlerInterceptor {
 
         HttpSession session = request.getSession(false);
         if (session != null && session.getAttribute("admin") != null) {
-            return true; // Admin is authenticated
+            return true;
         }
 
-        // Redirect unauthenticated users to login page
         response.sendRedirect("/login");
         return false;
     }
 }
+

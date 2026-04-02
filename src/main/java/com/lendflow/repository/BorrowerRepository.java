@@ -15,3 +15,4 @@ public interface BorrowerRepository extends JpaRepository<Borrower, Long> {
     List<Borrower> findByBusinessType(String businessType);
     List<Borrower> findAllByOrderByDateAddedDesc();
 }
+

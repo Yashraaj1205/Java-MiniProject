@@ -13,3 +13,4 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Payment> findByLoanIdOrderByPaymentDateDesc(Long loanId);
     List<Payment> findByPaymentDateBetween(LocalDate start, LocalDate end);
 }
+

@@ -13,3 +13,4 @@ public interface EMIScheduleRepository extends JpaRepository<EMISchedule, Long> 
     List<EMISchedule> findByLoanIdAndStatus(Long loanId, String status);
     List<EMISchedule> findByStatusAndDueDateBefore(String status, LocalDate date);
 }
+

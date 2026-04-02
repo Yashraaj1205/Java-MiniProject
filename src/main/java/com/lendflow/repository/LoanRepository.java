@@ -26,3 +26,4 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
     @Query("SELECT l FROM Loan l WHERE l.issueDate BETWEEN :start AND :end")
     List<Loan> findLoansIssuedBetween(@Param("start") LocalDate start, @Param("end") LocalDate end);
 }
+

@@ -1,5 +1,7 @@
 package com.lendflow.config;
 
+import com.lendflow.exception.ResourceNotFoundException;
+import com.lendflow.exception.ValidationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -16,8 +18,26 @@ public class GlobalExceptionHandler {
             return "redirect:/borrowers";
         }
         
-        // Generic fallback for other unique constraints
         redirectAttributes.addFlashAttribute("error", "A database constraint was violated. Please check your data.");
         return "redirect:/dashboard";
     }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public String handleResourceNotFoundException(ResourceNotFoundException e, RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("error", e.getMessage());
+        return "redirect:/dashboard";
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    public String handleValidationException(ValidationException e, RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("error", e.getMessage());
+        return "redirect:/dashboard";
+    }
+
+    @ExceptionHandler(Exception.class)
+    public String handleGenericException(Exception e, RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("error", "An unexpected error occurred: " + e.getMessage());
+        return "redirect:/dashboard";
+    }
 }
+
