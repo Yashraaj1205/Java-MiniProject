@@ -28,5 +28,10 @@ public class BorrowerServiceImpl implements IBorrowerService {
     public Borrower saveBorrower(Borrower borrower) {
         return borrowerRepository.save(borrower);
     }
+
+    @Override
+    public void deleteBorrower(Long id) {
+        borrowerRepository.deleteById(id);
+    }
 }
 

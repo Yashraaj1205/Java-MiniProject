@@ -115,10 +115,9 @@ public class NotificationServiceImpl implements INotificationService {
             helper.setTo(toEmail);
             helper.setSubject(subject);
 
-            String htmlMsg = "<div style='font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;'>" +
-                    "<div style='background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); padding: 30px; text-align: center; color: white;'>" +
-                    "<h1 style='margin: 0; font-size: 24px;'>LendFlow</h1>" +
-                    "<p style='margin-top: 10px; opacity: 0.9;'>Smart Loan Management</p>" +
+            String htmlMsg = "<div style='font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden;'>" +
+                    "<div style='background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); padding: 45px; text-align: center; color: white;'>" +
+                    "<img src='cid:logo' style='width: 120px; height: auto; border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);' />" +
                     "</div>" +
                     "<div style='padding: 30px; color: #1e293b; line-height: 1.6;'>" +
                     "<p style='white-space: pre-wrap;'>" + text + "</p>" +
@@ -139,6 +138,16 @@ public class NotificationServiceImpl implements INotificationService {
                     "</div></div>";
 
             helper.setText(htmlMsg, true);
+
+            // Add brand logo
+            try {
+                org.springframework.core.io.Resource logoRes = new org.springframework.core.io.ClassPathResource("static/images/logo.png");
+                if (logoRes.exists()) {
+                    helper.addInline("logo", logoRes);
+                }
+            } catch (Exception e) {
+                log.warn("Could not attach logo to email: {}", e.getMessage());
+            }
 
             if (settings.getQrCodePath() != null) {
                 String fullPath = settings.getQrCodePath().replaceFirst("^/", "");

@@ -19,7 +19,6 @@ public class Loan extends BaseEntity {
     @Column(unique = true, nullable = false)
     private String loanReference;
 
-    
     @Column(nullable = false)
     private BigDecimal principalAmount;
     
@@ -75,7 +74,6 @@ public class Loan extends BaseEntity {
     @OrderBy("actionDate DESC")
     private List<RecoveryAction> recoveryActions;
 
-    
     public BigDecimal getTotalPayable() {
         BigDecimal total = principalAmount;
         if (interestRate != null && interestRate > 0 && issueDate != null && endDate != null) {
@@ -91,18 +89,15 @@ public class Loan extends BaseEntity {
         return total;
     }
 
-    
     public BigDecimal getTotalInterest() {
         return getTotalPayable().subtract(principalAmount);
     }
 
-    
     public BigDecimal getOutstandingBalance() {
         BigDecimal paid = getTotalPaid();
         return getTotalPayable().subtract(paid);
     }
 
-    
     public BigDecimal getTotalPaid() {
         if (payments == null || payments.isEmpty()) return BigDecimal.ZERO;
         return payments.stream()
@@ -110,7 +105,6 @@ public class Loan extends BaseEntity {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    
     public BigDecimal getTotalLateFees() {
         if (payments == null || payments.isEmpty()) return BigDecimal.ZERO;
         return payments.stream()
@@ -118,7 +112,6 @@ public class Loan extends BaseEntity {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    
     public int getCompletionPercent() {
         BigDecimal total = getTotalPayable();
         if (total.compareTo(BigDecimal.ZERO) == 0) return 100;
@@ -128,7 +121,6 @@ public class Loan extends BaseEntity {
                 .intValue();
     }
 
-    
     public long getPaidInstallments() {
         if (emiSchedules == null) return 0;
         return emiSchedules.stream()
@@ -136,7 +128,6 @@ public class Loan extends BaseEntity {
                 .count();
     }
 
-    
     public long getOverdueInstallments() {
         if (emiSchedules == null) return 0;
         return emiSchedules.stream()
@@ -144,4 +135,3 @@ public class Loan extends BaseEntity {
                 .count();
     }
 }
-

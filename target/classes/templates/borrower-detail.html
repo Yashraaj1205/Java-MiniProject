@@ -14,7 +14,7 @@
         <a th:href="@{/borrowers}" style="text-decoration: none; color: var(--text-muted);"><i class="fa-solid fa-arrow-left me-2"></i>Back to Borrowers</a>
         
         <div class="profile-header mt-3">
-            <div class="profile-avatar" th:text="${borrower.name.substring(0,1)}">A</div>
+            <div class="profile-avatar" th:text="${borrower.name.substring(0,1).toUpperCase()}">A</div>
             <div class="flex-grow-1">
                 <h2 class="fw-bold mb-1" th:text="${borrower.name}">Name</h2>
                 <div class="text-muted mb-2">
@@ -26,9 +26,11 @@
                     <span th:if="${borrower.email != null and !borrower.email.isEmpty()}"><i class="fa-solid fa-envelope me-1"></i> <span th:text="${borrower.email}">Email</span></span>
                 </div>
             </div>
-            <div class="text-end">
-                <div class="text-muted" style="font-size: 0.85rem;">Risk Profile</div>
+            <div class="text-end d-flex flex-column align-items-end gap-2">
                 <span th:class="${'badge-status badge-' + (borrower.riskProfile == 'Low' ? 'active' : (borrower.riskProfile == 'Medium' ? 'completed' : 'overdue'))}" th:text="${borrower.riskProfile + ' Risk'}">Risk</span>
+                <button class="btn btn-sm btn-delete-outline mt-2" data-bs-toggle="modal" data-bs-target="#deleteBorrowerModal">
+                    <i class="fa-solid fa-trash-can me-1"></i> Delete Borrower
+                </button>
             </div>
         </div>
 
@@ -136,6 +138,26 @@
                         <button type="submit" class="btn" style="background:#FFB800; color:#000; font-weight:600;">Issue Loan</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteBorrowerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 16px; border: none;">
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3 text-danger">
+                        <i class="fa-solid fa-triangle-exclamation fa-3x"></i>
+                    </div>
+                    <h4 class="fw-bold mb-2">Delete Borrower?</h4>
+                    <p class="text-muted mb-4">Are you sure you want to delete <strong th:text="${borrower.name}">Borrower</strong>? This action will also delete all their loans and payment history. This cannot be undone.</p>
+                    <div class="d-flex gap-3 justify-content-center">
+                        <button type="button" class="btn btn-light px-4" style="border-radius: 10px;" data-bs-dismiss="modal">Cancel</button>
+                        <form th:action="@{'/borrowers/' + ${borrower.id} + '/delete'}" method="post">
+                            <button type="submit" class="btn btn-danger px-4" style="border-radius: 10px; background: #C62828;">Delete Permanently</button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

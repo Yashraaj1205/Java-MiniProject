@@ -7,5 +7,6 @@ public interface IBorrowerService {
     List<Borrower> getAllBorrowers();
     Borrower getBorrowerById(Long id);
     Borrower saveBorrower(Borrower borrower);
+    void deleteBorrower(Long id);
 }
 

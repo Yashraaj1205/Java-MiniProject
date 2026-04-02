@@ -20,12 +20,8 @@
     
     <div th:fragment="sidebar(activePage)">
         <div class="sidebar">
-            <div class="brand">
-                <div class="logo-icon">₹</div>
-                <div>
-                    LendFlow
-                    <span>Lending Manager</span>
-                </div>
+            <div class="brand" style="justify-content: center; padding-bottom: 25px;">
+                <img th:src="@{/images/logo.png}" alt="LendFlow Logo" class="brand-logo shadow-sm">
             </div>
 
             <a th:href="@{/dashboard}" class="nav-item" th:classappend="${activePage == 'dashboard'} ? 'active' : ''">

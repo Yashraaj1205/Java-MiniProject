@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 @EqualsAndHashCode(callSuper = true)
 public class Expense extends BaseEntity {
 
-
     @Column(nullable = false)
     private String category; 
 
@@ -31,4 +30,3 @@ public class Expense extends BaseEntity {
     @Builder.Default
     private String paymentMethod = "Cash"; 
 }
-

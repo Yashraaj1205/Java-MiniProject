@@ -33,5 +33,11 @@ public class BorrowerController {
         borrowerService.saveBorrower(borrower);
         return "redirect:/borrowers";
     }
+
+    @PostMapping("/{id}/delete")
+    public String deleteBorrower(@PathVariable Long id) {
+        borrowerService.deleteBorrower(id);
+        return "redirect:/borrowers";
+    }
 }
 
