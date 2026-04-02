@@ -73,3 +73,5 @@ When presenting, focus on these three pillars:
 
 > [!TIP]
 > **Pro Tip for Evaluators**: Always show the **"Delete Borrower" with the confirmation modal**. Highlighting data safety shows that you thought about the "User Experience" (UX) and "Data Integrity," not just the code.
+
+2026
